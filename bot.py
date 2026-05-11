@@ -44,7 +44,30 @@ async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_chat.id
     user_text = update.message.text.strip()
-    await update.message.reply_text(user_text)
+
+    history_by_chat_id[chat_id].append({"role": "user", "content": user_text})
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history_by_chat_id[chat_id][-MAX_HISTORY_MESSAGES:]
+
+    await update.message.chat.send_action(ChatAction.TYPING)
+
+    try:
+        response = client.chat.completions.create(
+            model=DEEPSEEK_MODEL,
+            messages=messages,
+            temperature=0.9,
+            max_tokens=250,
+            extra_body={"thinking": {"type": "disabled"}},
+        )
+        answer = (response.choices[0].message.content or "").strip()
+    except Exception as exc:
+        print(f"DeepSeek error: {exc}")
+        answer = "ой, у меня ошибка в голове"
+
+    if not answer:
+        answer = "я чето завис, змеиный мозг пустой"
+
+    history_by_chat_id[chat_id].append({"role": "assistant", "content": answer})
+    await update.message.reply_text(answer[:4096])
 
 
 def main() -> None:
