@@ -3,6 +3,9 @@ from collections import defaultdict
 
 from dotenv import load_dotenv
 from openai import OpenAI
+from telegram import Update
+from telegram.constants import ChatAction
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
 load_dotenv()
 
