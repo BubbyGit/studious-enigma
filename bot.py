@@ -12,7 +12,7 @@ load_dotenv()
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
-DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-v4-flash")
+DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
 MAX_HISTORY_MESSAGES = int(os.getenv("MAX_HISTORY_MESSAGES", "12"))
 
 SYSTEM_PROMPT = (
@@ -56,12 +56,11 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             messages=messages,
             temperature=0.9,
             max_tokens=250,
-            extra_body={"thinking": {"type": "disabled"}},
         )
         answer = (response.choices[0].message.content or "").strip()
     except Exception as exc:
-        print(f"DeepSeek error: {exc}")
-        answer = "ой, у меня ошибка в голове"
+        print(f"DeepSeek error: {type(exc).__name__}: {exc}")
+        answer = f"ой, DeepSeek упал: {type(exc).__name__}"
 
     if not answer:
         answer = "я чето завис, змеиный мозг пустой"
