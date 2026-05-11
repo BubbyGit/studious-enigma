@@ -2,6 +2,7 @@ import os
 from collections import defaultdict
 
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 
@@ -24,6 +25,7 @@ if not TELEGRAM_BOT_TOKEN:
 if not DEEPSEEK_API_KEY:
     raise RuntimeError("Нет DEEPSEEK_API_KEY в .env")
 
+client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
 history_by_chat_id = defaultdict(list)
 
 print("config loaded")
