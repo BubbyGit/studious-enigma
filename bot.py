@@ -29,6 +29,31 @@ if not DEEPSEEK_API_KEY:
     raise RuntimeError("Нет DEEPSEEK_API_KEY в .env")
 
 client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
-history_by_chat_id = defaultdict(list)
+history_by_chat_id: dict[int, list[dict[str, str]]] = defaultdict(list)
 
-print("config loaded")
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text("привет, я Змей. пиши че-нибудь, я отвечу")
+
+
+async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    history_by_chat_id.pop(update.effective_chat.id, None)
+    await update.message.reply_text("память стер, я чистый змей")
+
+
+async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    chat_id = update.effective_chat.id
+    user_text = update.message.text.strip()
+    await update.message.reply_text(user_text)
+
+
+def main() -> None:
+    app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("reset", reset))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
+    app.run_polling(allowed_updates=Update.ALL_TYPES)
+
+
+if __name__ == "__main__":
+    main()
